@@ -1,0 +1,6 @@
+outs:
+- md5: f25ed775194f01810e519df95588062a.dir
+  size: 143195
+  nfiles: 3
+  hash: md5
+  path: DataBase
