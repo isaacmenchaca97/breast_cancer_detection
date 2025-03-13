@@ -6,3 +6,4 @@ mlflow
 scikit-learn
 scipy
 dvc
+dagshub
