@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 import yaml
+import dagshub
 
 # MLFlow
 # ========================================================================
@@ -13,12 +14,24 @@ import mlflow.sklearn
 # ========================================================================
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 
-params = yaml.safe_load(open("params.yamls"))["train"]
+# Model Performance Evaluators
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
+    classification_report,
+)
+
+params = yaml.safe_load(open("params.yaml"))["train"]
+
+# TODO: Set enviroment parameters
 
 
 def train():
@@ -38,6 +51,7 @@ def train():
     print(class_weights)
 
     mlflow.set_tracking_uri("https://dagshub.com/isaacmenchaca97/breast_cancer_detection.mlflow")
+    dagshub.init(repo_owner='isaacmenchaca97', repo_name='breast_cancer_detection', mlflow=True)
     mlflow.set_experiment("Breast Cancer Classification")
 
     with mlflow.start_run():
@@ -50,3 +64,38 @@ def train():
         )
 
         model_pipeline.fit(X_train, y_train)
+        # making the predictions
+        y_pred = model_pipeline.predict(X_test)
+
+        # metrics
+        confusionmatrix = np.around(confusion_matrix(y_test, y_pred, normalize="true"), 3)
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        roc_auc = roc_auc_score(y_test, y_pred)
+
+        # Register parameters
+        mlflow.log_param("n_components", params["n_components"])
+        mlflow.log_param("solver", "liblinear")
+
+        # Register metrics
+        mlflow.log_metric("Accuracy", accuracy)
+        mlflow.log_metric("Precision", precision)
+        mlflow.log_metric("Recall", recall)
+        mlflow.log_metric("F1 Score", f1)
+        mlflow.log_metric("ROC AUC", roc_auc)
+
+        mlflow.log_text(str(confusionmatrix), "confusion_matrix.txt")
+        mlflow.log_text(classification_report(y_test, y_pred), "classification_report.txt")
+
+        # Register model
+        mlflow.sklearn.log_model(
+            model_pipeline, "model_cancer_classification", input_example=X_train.iloc[:2]
+        )
+
+    print("train done")
+
+
+if __name__ == "__main__":
+    train()
