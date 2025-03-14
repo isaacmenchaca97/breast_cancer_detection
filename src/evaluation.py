@@ -31,7 +31,7 @@ def evaluate():
     accuracy = accuracy_score(y, predictions)
     # log metrics to MLFLOW
     mlflow.log_metric("accuracy", accuracy)
-    print("Model accuracy:{accuracy}")
+    print(f"Model accuracy:{accuracy}")
 
 
 if __name__ == "__main__":
