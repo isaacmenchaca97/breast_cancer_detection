@@ -29,9 +29,11 @@ from sklearn.metrics import (
     classification_report,
 )
 
-params = yaml.safe_load(open("params.yaml"))["train"]
+import os
+import pickle
 
-# TODO: Set enviroment parameters
+
+params = yaml.safe_load(open("params.yaml"))["train"]
 
 
 def train():
@@ -93,6 +95,11 @@ def train():
         mlflow.sklearn.log_model(
             model_pipeline, "model_cancer_classification", input_example=X_train.iloc[:2]
         )
+        # create the directory to save the model
+        os.makedirs(os.path.dirname(params["model"]), exist_ok=True)
+
+        filename = params["model"]
+        pickle.dump(model_pipeline, open(filename, 'wb'))
 
     print("train done")
 
