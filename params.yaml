@@ -1,0 +1,8 @@
+preprocess:
+  output: DataBase/processed_data.csv
+
+train:
+  data: DataBase/processed_data.csv
+  model: models/model.pkl
+  ramdom_state: 42
+  n_components: 5
