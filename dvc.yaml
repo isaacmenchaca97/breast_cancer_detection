@@ -20,8 +20,8 @@ stages:
     outs:
     - models/model.pkl
   evaluate:
-    cmd: python src/evaluate.py
+    cmd: python src/evaluation.py
     deps:
     - DataBase/processed_data.csv
     - models/model.pkl
-    - src/evaluate.py
+    - src/evaluation.py
