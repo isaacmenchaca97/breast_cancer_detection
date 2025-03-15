@@ -1,3 +1,5 @@
+[core]
+    autostage = true
 ['remote "origin"']
     url = s3://dvc
     endpointurl = https://dagshub.com/isaacmenchaca97/breast_cancer_detection.s3
