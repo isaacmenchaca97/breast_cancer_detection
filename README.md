@@ -46,7 +46,11 @@ jupyter notebook breast_cancer.ipynb
 
 ## Results
 
-The model achieved an accuracy of 95% on the test set, demonstrating its effectiveness in distinguishing between malignant and benign tumors.
+The model achieved an accuracy of 96% on the test set, demonstrating its effectiveness in distinguishing between malignant and benign tumors.
+
+![Screenshot 2025-03-22 at 11 37 19 p m](https://github.com/user-attachments/assets/53f1ada1-4fd8-4371-bbd9-aacc57f5a753)
+![Screenshot 2025-03-22 at 11 37 32 p m](https://github.com/user-attachments/assets/36bae02d-3011-4ed7-8c62-2865a4a79e61)
+
 
 ## Future Improvements
 
@@ -61,5 +65,5 @@ This project is licensed under the MIT License.
 
 The Principal Component Analysis (PCA) implementation in this project is based on the work of [Daksh Bhatnagar][2].
 
-[1]: https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data
+[1]: [https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data](https://doi.org/10.24432/C5DW2B)
 [2]: https://www.kaggle.com/code/bhatnagardaksh/pca-and-lda-implementation/notebook 
