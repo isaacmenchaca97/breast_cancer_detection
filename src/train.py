@@ -40,7 +40,7 @@ def train():
     df = pd.read_csv(params["data"])
     X = df.drop(columns=["target"])
     y = df["target"]
-    X_train, X_test, y_train, y_test = train_test_split(
+    x_train, x_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=params["ramdom_state"]
     )
 
@@ -63,11 +63,12 @@ def train():
             LogisticRegression(
                 solver="liblinear", class_weight=class_weights, random_state=params["ramdom_state"]
             ),
+            memory=None
         )
 
-        model_pipeline.fit(X_train, y_train)
+        model_pipeline.fit(x_train, y_train)
         # making the predictions
-        y_pred = model_pipeline.predict(X_test)
+        y_pred = model_pipeline.predict(x_test)
 
         # metrics
         confusionmatrix = np.around(confusion_matrix(y_test, y_pred, normalize="true"), 3)
@@ -93,7 +94,7 @@ def train():
 
         # Register model
         mlflow.sklearn.log_model(
-            model_pipeline, "model_cancer_classification", input_example=X_train.iloc[:2]
+            model_pipeline, "model_cancer_classification", input_example=x_train.iloc[:2]
         )
         # create the directory to save the model
         os.makedirs(os.path.dirname(params["model"]), exist_ok=True)
