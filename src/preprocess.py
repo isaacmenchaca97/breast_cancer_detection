@@ -53,7 +53,7 @@ def preprocess(output_path):
             print("\033[0m")  # Reset text color to default
             unrelated_num_cols.append(i)
 
-    df.drop(labels=unrelated_num_cols, axis=1, inplace=True)
+    df = df.drop(labels=unrelated_num_cols, axis=1)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
