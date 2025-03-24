@@ -59,7 +59,7 @@ def train():
     with mlflow.start_run():
         model_pipeline = make_pipeline(
             MinMaxScaler(),
-            PCA(n_components=params["n_components"]),
+            PCA(n_components=params["n_components"], random_state=params["ramdom_state"]),
             LogisticRegression(
                 solver="liblinear", class_weight=class_weights, random_state=params["ramdom_state"]
             ),
