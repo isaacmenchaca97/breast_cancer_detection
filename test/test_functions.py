@@ -9,17 +9,17 @@ import pandas as pd
 from io import StringIO
 
 
-# Fixture to create a temporary directory for test outputs
 @pytest.fixture
 def temp_dir():
+    """Fixture to create a temporary directory for test outputs."""
     tmp_dir = tempfile.mkdtemp()
     yield tmp_dir
     shutil.rmtree(tmp_dir)
 
 
-# Fixture to mock the load_breast_cancer function
 @pytest.fixture
 def mock_dataset():
+    """Fixture to mock the load_breast_cancer function."""
     # Create a mock dataset similar to breast cancer dataset structure
     class MockDataset:
         def __init__(self):
@@ -41,15 +41,15 @@ def mock_dataset():
     return MockDataset()
 
 
-# Test that data is loaded and transformed correctly
 def test_data_loading_and_transformation(mock_dataset, temp_dir):
+    """Test that data is loaded and transformed correctly."""
     output_path = os.path.join(temp_dir, "processed/train.csv")
 
     # Mock the breast cancer dataset loading
-    with patch('preprocess.load_breast_cancer', return_value=mock_dataset):
+    with patch('src.preprocess.load_breast_cancer', return_value=mock_dataset):
         # Mock the yaml loading to use our test output path
         mock_params = {"output": output_path}
-        with patch('preprocess.params', mock_params):
+        with patch('src.preprocess.params', mock_params):
             # Capture stdout to prevent printing during tests
             with patch('sys.stdout', new=StringIO()):
                 # Run the preprocessing function
