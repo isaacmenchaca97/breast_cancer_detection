@@ -6,6 +6,3 @@ mlflow
 scikit-learn
 scipy
 pytest
-dvc
-dagshub
-dvc-s3
