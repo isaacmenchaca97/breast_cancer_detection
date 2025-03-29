@@ -34,7 +34,9 @@ jobs:
       run: uv sync
     
     - name: Run linter
-      run: make lint
+      run: |
+        ruff format --check .
+        ruff check
     
     - name: Run format
       run: make format
