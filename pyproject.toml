@@ -17,25 +17,28 @@ classifiers = [
 ]
 dependencies = [
     "dagshub",
-    "ipython",
+    "fastapi",
+    "ipython", 
     "jupyterlab",
     "loguru",
     "matplotlib",
-    "mlflow",
     "mkdocs",
+    "mlflow",
     "notebook",
     "numpy",
     "pandas",
     "pip",
+    "pydantic",
     "pytest",
-    "pytest-cov",
+    "pytest-cov", 
     "python-dotenv",
     "ruff",
-    "seaborn",
-    "scipy",
     "scikit-learn",
+    "scipy",
+    "seaborn",
     "tqdm",
     "typer",
+    "uvicorn",
 ]
 requires-python = "~=3.9.0"
 
