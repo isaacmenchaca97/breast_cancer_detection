@@ -2,10 +2,9 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN apt-get update -y && apt-get upgrade -y
-
-# Create a non-root user
-RUN useradd -m appuser
+RUN apt-get update -y \
+&& apt-get upgrade -y \
+&& useradd -m appuser
 
 # Copy project files
 COPY requirements.txt .

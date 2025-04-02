@@ -13,7 +13,7 @@ class DummyModel:
     def __init__(self, predictions):
         self.predictions = predictions
     
-    def predict(self, X):
+    def predict(self, x):
         return self.predictions
 
 
