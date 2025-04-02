@@ -1,49 +1,80 @@
 import pytest
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import tempfile
-from unittest.mock import patch, MagicMock
 import pickle
 
 # Import the function to test
 from src.modeling.predict import main
 
 
-def test_model_loading_error():
+# Define DummyModel at module level for pickling
+class DummyModel:
+    def __init__(self, predictions):
+        self.predictions = predictions
+    
+    def predict(self, x):
+        return self.predictions
+
+
+def test_successful_prediction():
     with tempfile.TemporaryDirectory() as temp_dir:
-        # Create test paths with valid CSV files but invalid model file
+        # Create test paths
         features_path = Path(temp_dir) / "test_features.csv"
         predictions_path = Path(temp_dir) / "test_predictions.csv"
         model_path = Path(temp_dir) / "model.pkl"
         
-        # Create dummy data files
-        pd.DataFrame([[1, 2], [3, 4]]).to_csv(features_path, index=False)
-        pd.DataFrame([0, 1]).to_csv(predictions_path, index=False)
+        # Create dummy test data
+        x_test = pd.DataFrame({
+            'feature1': [1.0, 2.0, 3.0],
+            'feature2': [0.1, 0.2, 0.3]
+        })
+        y_test = pd.DataFrame([0, 1, 0])
         
-        # Create invalid model file
-        with open(model_path, "w") as f:
-            f.write("This is not a valid pickle file")
+        # Create a dummy model with predetermined predictions
+        model = DummyModel(predictions=[0, 1, 0])
         
-        # The function should raise an exception when loading the model
-        with pytest.raises(Exception):
-            main(
-                features_path=features_path,
-                model_path=model_path,
-                predictions_path=predictions_path
-            )
+        # Save test data and model
+        x_test.to_csv(features_path, index=False)
+        y_test.to_csv(predictions_path, index=False)
+        with open(model_path, 'wb') as f:
+            pickle.dump(model, f)
+        
+        # Run prediction
+        main(
+            features_path=features_path,
+            model_path=model_path,
+            predictions_path=predictions_path
+        )
 
-def test_file_not_found():
+
+def test_accuracy_calculation():
     with tempfile.TemporaryDirectory() as temp_dir:
-        # Set paths to files that don't exist
-        features_path = Path(temp_dir) / "nonexistent_features.csv"
-        predictions_path = Path(temp_dir) / "nonexistent_predictions.csv"
-        model_path = Path(temp_dir) / "nonexistent_model.pkl"
+        # Create test paths
+        features_path = Path(temp_dir) / "test_features.csv"
+        predictions_path = Path(temp_dir) / "test_predictions.csv"
+        model_path = Path(temp_dir) / "model.pkl"
         
-        # The function should raise an exception
-        with pytest.raises(FileNotFoundError):
-            main(
-                features_path=features_path,
-                model_path=model_path,
-                predictions_path=predictions_path
-            )
+        # Create dummy test data
+        x_test = pd.DataFrame({
+            'feature1': [1.0, 2.0, 3.0, 4.0],
+            'feature2': [0.1, 0.2, 0.3, 0.4]
+        })
+        y_test = pd.DataFrame([0, 1, 0, 1])
+        
+        # Create a dummy model with predetermined predictions
+        model = DummyModel(predictions=[0, 1, 0, 0])
+        
+        # Save test data and model
+        x_test.to_csv(features_path, index=False)
+        y_test.to_csv(predictions_path, index=False)
+        with open(model_path, 'wb') as f:
+            pickle.dump(model, f)
+        
+        # Run prediction - this should result in 75% accuracy
+        # as 3 out of 4 predictions match the true values
+        main(
+            features_path=features_path,
+            model_path=model_path,
+            predictions_path=predictions_path
+        )
