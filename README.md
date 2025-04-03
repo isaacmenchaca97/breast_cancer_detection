@@ -2,60 +2,121 @@
 
 ## Overview
 
-This project implements a machine learning model to detect breast cancer using classification techniques. The goal is to accurately classify tumors as malignant or benign based on various input features.
+This project implements a machine learning model to detect breast cancer using classification techniques. The goal is to accurately classify tumors as malignant or benign based on various input features. The project includes both a trained model and a FastAPI-based REST API for making predictions.
 
 ## Dataset
 
-The model utilizes the [Breast Cancer Wisconsin (Diagnostic) Data Set][1], which contains features computed from digitized images of fine needle aspirate (FNA) of breast masses. Each instance is labeled as either malignant or benign.
+The model utilizes the [Breast Cancer Wisconsin (Diagnostic) Data Set][1], which contains features computed from digitized images of fine needle aspirate (FNA) of breast masses. Each instance is labeled as either malignant or benign. The dataset includes 569 samples with 30 features each.
 
 ## Model Architecture
 
-A Logistic Regression model is employed with the following parameters:
+After extensive model comparison using k-fold cross-validation, a Logistic Regression model was chosen as it achieved the highest accuracy (97.6%). The model pipeline includes:
 
-- **Solver**: `'liblinear'` – suitable for small datasets and supports L1 and L2 regularization.
-- **Class Weight**: `{0: 1.684, 1: 1.0}` – assigns a higher weight to the benign class to address class imbalance.
-- **Random State**: `42` – ensures reproducibility of results.
+1. **Feature Preprocessing**: MinMaxScaler for feature normalization
+2. **Dimensionality Reduction**: PCA (Principal Component Analysis)
+3. **Classification**: Logistic Regression with the following parameters:
+   - **Solver**: `'liblinear'` – suitable for small datasets
+   - **Class Weight**: `{0: 1.684, 1: 1.0}` – addresses class imbalance
+   - **Random State**: `42` – ensures reproducibility
+
+## Performance Metrics
+
+The model achieves excellent performance on the test set:
+- Accuracy: 96%
+- Precision: 96%
+- Recall: 96%
+- F1-Score: 96%
+- Error Rate: 4.386%
+
+## Project Structure
+
+```
+├── app.py                  # FastAPI application
+├── data/                   # Data directory
+├── models/                 # Trained model files
+├── notebooks/             # Jupyter notebooks for analysis
+├── src/                   # Source code
+├── tests/                 # Unit tests
+├── docs/                  # Documentation
+└── requirements.txt       # Python dependencies
+```
 
 ## Installation & Requirements
 
-To run this project, ensure you have the following installed:
-
-- Python 3.x
-- Libraries: `pandas`, `numpy`, `scikit-learn`, `matplotlib`
-
-## Usage
-
-Clone the repository and navigate to the project directory:
-
+1. Clone the repository:
 ```bash
 git clone https://github.com/isaacmenchaca97/breast_cancer_detection.git
 cd breast_cancer_detection
 ```
 
-Install the required libraries:
-
+2. Create and activate a virtual environment:
 ```bash
-pip install -r requirements.txt
+make create_environment
 ```
 
-Run the Jupyter Notebook to explore the analysis and model implementation:
-
+3. Install dependencies:
 ```bash
-jupyter notebook breast_cancer.ipynb
+make requirements
+```
+
+## Usage
+
+### As a Python Package
+
+```python
+import pickle
+import numpy as np
+
+# Load the model
+with open("models/model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+# Make predictions
+features = np.array([...])  # Your input features
+prediction = model.predict(features)
+```
+
+### As a REST API
+
+1. Start the FastAPI server:
+```bash
+uvicorn app:app --reload
+```
+
+2. Make predictions via HTTP:
+```bash
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"features": [...]}'
+```
+
+## Development
+
+The project uses several development tools:
+- **MLflow**: For experiment tracking and model versioning
+- **pytest**: For unit testing
+- **ruff**: For code linting and formatting
+
+Run tests:
+```bash
+make test
 ```
 
 ## Results
 
-The model achieved an accuracy of 96% on the test set, demonstrating its effectiveness in distinguishing between malignant and benign tumors.
+The model demonstrates robust performance in distinguishing between malignant and benign tumors:
 
-![Screenshot 2025-03-22 at 11 37 19 p m](https://github.com/user-attachments/assets/53f1ada1-4fd8-4371-bbd9-aacc57f5a753)
-![Screenshot 2025-03-22 at 11 37 32 p m](https://github.com/user-attachments/assets/36bae02d-3011-4ed7-8c62-2865a4a79e61)
-
+- High accuracy across all metrics (precision, recall, F1-score)
+- Strong ROC-AUC performance
+- Low misclassification rate (4.386%)
 
 ## Future Improvements
 
-- Implement additional preprocessing techniques to enhance feature extraction.
-- Explore other classification algorithms to potentially improve performance.
+- Implement additional preprocessing techniques
+- Explore deep learning approaches
+- Add model explainability features
+- Enhance API documentation
+- Implement batch prediction endpoints
 
 ## License
 
@@ -63,7 +124,8 @@ This project is licensed under the MIT License.
 
 ## Acknowledgments
 
-The Principal Component Analysis (PCA) implementation in this project is based on the work of [Daksh Bhatnagar][2].
+- The Principal Component Analysis (PCA) implementation is based on the work of [Daksh Bhatnagar][2]
+- Dataset provided by the University of Wisconsin
 
-[1]: [https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data](https://doi.org/10.24432/C5DW2B)
+[1]: https://doi.org/10.24432/C5DW2B
 [2]: https://www.kaggle.com/code/bhatnagardaksh/pca-and-lda-implementation/notebook 
