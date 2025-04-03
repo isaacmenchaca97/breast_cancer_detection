@@ -43,7 +43,7 @@ format:
 ## Run tests
 .PHONY: test
 test:
-	pytest --cov=src --cov-report=xml --cov-report=term
+	pytest --cov=src --cov=app --cov-report=xml --cov-report=term
 
 
 ## Set up Python interpreter environment
