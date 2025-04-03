@@ -73,6 +73,9 @@ jobs:
     needs: sonarqube
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  # Only deploy on main branch
+    outputs:
+      registry: ${{ steps.build-image.outputs.registry }}
+      image: ${{ steps.build-image.outputs.image }}
 
     steps:
       - name: Checkout repository
@@ -90,6 +93,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: breast-cancer-api
@@ -97,8 +101,9 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-  
+
   deploy-ec2:
     name: Deploy to Amazon EC2
     needs: deploy-ecr
@@ -118,19 +123,16 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ECR_REGISTRY: ${{ needs.deploy-ecr.outputs.registry }}
-          ECR_REPOSITORY: breast-cancer-api
-          IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
           # SSH into EC2 and deploy the new image
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_HOST '
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.deploy-ecr.outputs.registry }}
+            docker pull ${{ needs.deploy-ecr.outputs.image }}
             docker stop breast-cancer-api || true
             docker rm breast-cancer-api || true
-            docker run -d --name breast-cancer-api -p 8000:8000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            docker run -d --name breast-cancer-api -p 8000:8000 ${{ needs.deploy-ecr.outputs.image }}
           '
           rm -f private_key.pem
