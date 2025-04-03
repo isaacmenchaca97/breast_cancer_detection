@@ -120,6 +120,7 @@ jobs:
 
       - name: Deploy to EC2
         env:
+          ECR_REGISTRY: ${{ needs.deploy-ecr.outputs.registry }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -133,7 +134,7 @@ jobs:
           
           # SSH into EC2 and deploy the new image
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key $EC2_USERNAME@$EC2_HOST '
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.deploy-ecr.outputs.registry }}
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull ${{ needs.deploy-ecr.outputs.image }}
             docker stop breast-cancer-api || true
             docker rm breast-cancer-api || true
