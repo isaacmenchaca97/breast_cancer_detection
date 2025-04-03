@@ -124,15 +124,19 @@ jobs:
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          # Setup SSH key with proper format and permissions
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/deploy_key
           
           # SSH into EC2 and deploy the new image
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_HOST '
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key $EC2_USERNAME@$EC2_HOST '
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ needs.deploy-ecr.outputs.registry }}
             docker pull ${{ needs.deploy-ecr.outputs.image }}
             docker stop breast-cancer-api || true
             docker rm breast-cancer-api || true
             docker run -d --name breast-cancer-api -p 8000:8000 ${{ needs.deploy-ecr.outputs.image }}
           '
-          rm -f private_key.pem
+          rm -f ~/.ssh/deploy_key
